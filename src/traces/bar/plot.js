@@ -178,7 +178,7 @@ function appendBarText(gd, bar, calcTrace, i, x0, x1, y0, y1) {
     }
 
     var textFont = getTextFont(trace, i, gd._fullLayout.font),
-        insideTextFont = getInsideTextFont(trace, i, textFont),
+        insideTextFont = getInsideTextFont(trace, i, textFont, calcTrace[i].mc),
         outsideTextFont = getOutsideTextFont(trace, i, textFont);
 
     // compute text position
@@ -443,9 +443,10 @@ function getTextFont(trace, index, defaultValue) {
         attributeTextFont, trace.textfont, index, defaultValue);
 }
 
-function getInsideTextFont(trace, index, defaultValue) {
+function getInsideTextFont(trace, index, defaultFont, barColor) {
+    defaultFont.color = Color.contrast(barColor);
     return getFontValue(
-        attributeInsideTextFont, trace.insidetextfont, index, defaultValue);
+        attributeInsideTextFont, trace.insidetextfont, index, defaultFont);
 }
 
 function getOutsideTextFont(trace, index, defaultValue) {
