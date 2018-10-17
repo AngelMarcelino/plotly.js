@@ -912,6 +912,26 @@ describe('A bar plot', function() {
         };
     }
 
+    function assertTextFontFamilies(expFontFamilies) {
+        return function() {
+            var selection = d3.selectAll(BAR_TEXT_SELECTOR);
+            expect(selection.size()).toBe(expFontFamilies.length);
+            selection.each(function(d, i) {
+                expect(this.style.fontFamily).toBe(expFontFamilies[i]);
+            });
+        };
+    }
+
+    function assertTextFontSizes(expFontSizes) {
+        return function() {
+            var selection = d3.selectAll(BAR_TEXT_SELECTOR);
+            expect(selection.size()).toBe(expFontSizes.length);
+            selection.each(function(d, i) {
+                expect(this.style.fontSize).toBe(expFontSizes[i] + 'px');
+            });
+        };
+    }
+
     it('should show bar texts (inside case)', function(done) {
         var data = [{
             y: [10, 20, 30],
@@ -1090,6 +1110,44 @@ describe('A bar plot', function() {
 
         Plotly.plot(gd, [data])
           .then(assertTextFontColors([rgb('yellow'), rgb('green'), LIGHT, LIGHT, DARK, LIGHT]))
+          .catch(failTest)
+          .then(done);
+    });
+
+    it('should use a contrasting text color by default for outside labels being pushed inside ' +
+      'because of another bar stacked above', function(done) {
+        var trace1 = {
+            x: [5],
+            y: [5],
+            text: ['Giraffes'],
+            type: 'bar',
+            textposition: 'outside'
+        };
+        var trace2 = Lib.extendFlat({}, trace1);
+        var layout = {barmode: 'stack'};
+
+        Plotly.plot(gd, [trace1, trace2], layout)
+          .then(assertTextFontColors([LIGHT, DARK]))
+          .catch(failTest)
+          .then(done);
+    });
+
+    it('should style outside labels pushed inside by bars stacked above as inside labels', function(done) {
+        var trace1 = {
+            x: [5],
+            y: [5],
+            text: ['Giraffes'],
+            type: 'bar',
+            textposition: 'outside',
+            insidetextfont: {color: 'blue', family: 'serif', size: 24}
+        };
+        var trace2 = Lib.extendFlat({}, trace1);
+        var layout = {barmode: 'stack', font: {family: 'Arial'}};
+
+        Plotly.plot(gd, [trace1, trace2], layout)
+          .then(assertTextFontColors([rgb('blue'), DARK]))
+          .then(assertTextFontFamilies(['serif', 'Arial']))
+          .then(assertTextFontSizes([24, 12]))
           .catch(failTest)
           .then(done);
     });
